@@ -25,7 +25,14 @@ class _Main extends React.Component<MainProps, MainState> {
     const users = this.props.users
     const pages = getPagesList(Math.ceil(users.length / 10))
     const usersPage = users.slice(this.state.pagesActive * 10, (this.state.pagesActive + 1) * 10)
-   
+
+    let pagination = {
+      min: [1,2,3],
+      mid: [Math.ceil(pages.length / 2) - 1, Math.ceil(pages.length / 2), Math.ceil(pages.length / 2) + 1],
+      max: [pages.length - 2, pages.length - 1, pages.length],
+      ellipsis: [false, false]
+    }
+    
     return (
       <main className="main">
         <div className="container">
@@ -43,18 +50,39 @@ class _Main extends React.Component<MainProps, MainState> {
 
           <div className="paginations">
             {
-              pages.map(item => (
-                <button
-                  onClick={() => this.setState({pagesActive: item - 1})}
-                  key={item}
-                  className={
-                    this.state.pagesActive + 1 === item ? 
-                    "paginations__button paginations__button__active" : "paginations__button"
+              pages.map(item => {
+                if(pagination.min.includes(item) || pagination.mid.includes(item) || pagination.max.includes(item)) {
+                  return (
+                    <button
+                      onClick={() => this.setState({pagesActive: item - 1})}
+                      key={item}
+                      className={
+                        this.state.pagesActive + 1 === item ? 
+                        "paginations__button paginations__button__active" : "paginations__button"
+                      }
+                    >
+                      {item}    
+                    </button>
+                  )
+                }
+
+                if(!pagination.min.includes(item) || !pagination.mid.includes(item) || !pagination.max.includes(item)) {
+                  if(pagination.ellipsis.every(item => item === true))  {
+                    console.log("true")
+                    return
                   }
-                >
-                  {item}    
-                </button>
-              ))
+
+                  if(pagination.ellipsis[0] === false && item < pagination.mid[pagination.mid.length - 1]) {
+                    pagination.ellipsis[0] = true
+                    return <div className="paginations__ellipsis">...</div>
+                  }
+
+                  if(pagination.ellipsis[1] === false && item > pagination.mid[pagination.mid.length - 1]) {
+                    pagination.ellipsis[1] = true
+                    return <div className="paginations__ellipsis">...</div>
+                  }                  
+                }
+              })
             }
           </div>
         </div>
